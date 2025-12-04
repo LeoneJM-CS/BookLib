@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="BookLib.App/BookLib.App.csproj" />
-  <Project Path="BookLib.Domain/BookLib.Domain.csproj" />
-  <Project Path="BookLib.Infastructure/BookLib.Infastructure.csproj" />
-  <Project Path="BookLib/BookLib.csproj" />
-</Solution>
