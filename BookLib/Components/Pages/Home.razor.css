@@ -1,0 +1,18 @@
+﻿body {
+}
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    padding-top:30vh;
+}
+.search-bar {
+    width: 60%;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    outline: none;
+}
+

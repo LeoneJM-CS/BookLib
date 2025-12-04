@@ -1,0 +1,64 @@
+﻿@page "/addBooks"
+@inject NavigationManager Navigation
+@inject IBookRepos Repository
+<PageTitle>Add Book</PageTitle>
+<div class="row justify-content-center mt-5">
+    <div class="col-8">
+        <EditForm method="post" FormName="AddBookForm" Model="Book" OnValidSubmit="AddBook" autocomplete="off">
+            <h3>Add New Book</h3>
+            <div class="mb-3">
+                <label for="title" class="form-label"> Title:</label>
+                <InputText id="title" @bind-Value="Book.Title" class="form-control shadow-none"></InputText>
+            </div>
+
+            <div class="mb-3">
+                <label for="series" class="form-label"> Series:</label>
+                <InputText id="series" @bind-Value="Book.Series" class="form-control shadow-none"></InputText>
+            </div>
+            <div class="mb-3">
+                <label for="authorfirst" class="form-label"> Author's Firstname:</label>
+                <InputText id="authorfirst" @bind-Value="Book.AuthorFirst" class="form-control shadow-none"></InputText>
+            </div>
+
+            <div class="mb-3">
+                <label for="authorlast" class="form-label"> Author's Lastname:</label>
+                <InputText id="authorlast" @bind-Value="Book.AuthorLast" class="form-control shadow-none"></InputText>
+            </div>
+
+            <div class="mb-3">
+                <label for="genre" class="form-label"> Genre:</label>
+                <InputSelect id="genre" @bind-Value="Book.Genre" class="form-control shadow-none">
+                <option value="">Select Genre:</option>
+                @foreach (var genre in Enum.GetValues(typeof(Genre)))
+                {
+                    <option value="@genre">
+                            @GenreDisplay.GetGenreName((Genre)genre).ToString()
+                    </option>
+                }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label"> Description:</label>
+                <InputText id="description" @bind-Value="Book.Description" class="form-control shadow-none"></InputText>
+            </div>
+
+            <div class="mb-3">
+                <label for="age" class="form-label"> Age Level:</label>
+                <InputText id="age" @bind-Value="Book.AgeLevel" class="form-control shadow-none"></InputText>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Book</button>
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+        </EditForm>
+    </div>
+</div>
+@code {
+    [SupplyParameterFromForm]
+    public Book Book { get; set; } = new();
+    private async Task AddBook()
+    {
+        await Repository.AddAsync(Book);
+        Navigation.NavigateTo("/");
+    }
+}

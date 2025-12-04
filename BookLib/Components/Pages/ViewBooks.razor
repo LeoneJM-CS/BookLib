@@ -1,0 +1,30 @@
+﻿@page "/viewbooks"
+@inject IBookRepos Repository
+@attribute [StreamRendering]
+
+<PageTitle>Books</PageTitle>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-8">
+        @* <a href="addBooks" class="btn btn-primary shadow-none ">
+            Add New Book
+        </a> *@
+        @if (books is null)
+        {
+            <div class="book-item">Loading books...</div>
+        }
+        else if (books.Any())
+        {
+            @foreach (var book in books)
+            {
+                <div class="book-item">
+                    <BookCard book1="book"/>
+                </div>    
+            }
+        }
+        else
+        {
+            <div class="book-item">No books found</div>    
+        }
+    </div>
+</div>

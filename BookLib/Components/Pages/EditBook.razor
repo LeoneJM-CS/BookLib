@@ -1,0 +1,87 @@
+﻿@page "/edit/{id:guid}"
+@inject IBookRepos Repository
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Book</PageTitle>
+
+@if (Book is not null)
+{
+    <div class="row justify-content-center mt-5">
+        <div class="col-8">
+            <EditForm method="post" Enhance="true" FormName="EditBookForm" Model="Book" OnValidSubmit="Editbook1" autocomplete="off">
+                <h3>
+                    Edit Book @Title
+                </h3>
+                <div class="mb-3">
+                    <label for="title" class="form-label"> Title:</label>
+                    <InputText id="title" @bind-Value="Book.Title" class="form-control shadow-none"></InputText>
+                </div>
+
+                <div class="mb-3">
+                    <label for="series" class="form-label"> Series:</label>
+                    <InputText id="series" @bind-Value="Book.Series" class="form-control shadow-none"></InputText>
+                </div>
+                <div class="mb-3">
+                    <label for="authorfirst" class="form-label"> Author's Firstname:</label>
+                    <InputText id="authorfirst" @bind-Value="Book.AuthorFirst" class="form-control shadow-none"></InputText>
+                </div>
+
+                <div class="mb-3">
+                    <label for="authorlast" class="form-label"> Author's Lastname:</label>
+                    <InputText id="authorlast" @bind-Value="Book.AuthorLast" class="form-control shadow-none"></InputText>
+                </div>
+
+                <div class="mb-3">
+                    <label for="genre" class="form-label"> Genre:</label>
+                    <InputSelect id="genre" @bind-Value="Book.Genre" class="form-control shadow-none">
+                        <option value="">Select Genre:</option>
+                        @foreach (var genre in Enum.GetValues(typeof(Genre)))
+                        {
+                            <option value="@genre">
+                                @GenreDisplay.GetGenreName((Genre)genre).ToString()
+                            </option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label"> Description:</label>
+                    <InputText id="description" @bind-Value="Book.Description" class="form-control shadow-none"></InputText>
+                </div>
+
+                <div class="mb-3">
+                    <label for="age" class="form-label"> Age Level:</label>
+                    <InputText id="age" @bind-Value="Book.AgeLevel" class="form-control shadow-none"></InputText>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save Book</button>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+            </EditForm>
+        </div>
+    </div>    
+}
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [SupplyParameterFromForm]
+    public Book? Book { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Book ??= await Repository.GetBookIdAsync(Id);
+    }
+    private async Task Editbook1()
+    {
+        if (Book is not null)
+        {   
+            Book.Id = Id;
+            await Repository.UpdateBookAsync(Book);
+            Navigation.NavigateTo("/viewbooks");
+        }
+    }
+}

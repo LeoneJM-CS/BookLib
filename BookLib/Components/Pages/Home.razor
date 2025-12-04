@@ -1,0 +1,41 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+@inject IBookRepos Repository
+<PageTitle>Home</PageTitle>
+<div class="container">
+    <div class="search-container">
+        <InputText @bind-Value="SearchTerm"
+                   @oninput="SearchBooksLive"
+                   placeholder="Search..."
+                   class="form-control" />
+        @if (Results is not null && Results.Any())
+        {
+            <ul>
+                @foreach (var book in Results)
+                {
+                    <li>@book.Title by @book.AuthorLast</li>
+                }
+            </ul>
+        }
+    </div>
+</div>
+
+@code {
+    private string SearchTerm { get; set; } = string.Empty;
+    private List<Book> Results { get; set; } = new();
+
+    private async Task SearchBooksLive(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value?.ToString() ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            Results = await Repository.SearchBooksAsync(SearchTerm);
+        }
+        else
+        {
+            Results.Clear();
+        }
+    }
+}
+
