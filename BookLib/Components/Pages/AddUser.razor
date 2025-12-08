@@ -1,0 +1,73 @@
+﻿@page "/sign_up"
+@inject IUserRepos Repository
+@inject NavigationManager Navigation
+
+<PageTitle>Sign In</PageTitle>
+
+<div class="row justify-content-center mb-5">
+    <div class="col-10">
+        <EditForm method="post" FormName="AddUserForm" Model="Users" OnValidSubmit="AddUsers" autocomplete="off">
+            <div class="mb-3">
+                <label for="username" class="form-label">
+                    Username:
+                </label>
+                <InputText id="username" @bind-Value="Users.UserName" class="form-control shadow-none"></InputText>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">
+                    Password:
+                </label>
+                <InputText id="password" @bind-Value="Users.UserPass" type="password" class="form-control shadow-none"></InputText>
+            </div>
+
+            <div class="mb-3">
+                <label for="favgenre" class="form-label"> Favorite Genre:</label>
+                <InputSelect id="favgenre" @bind-Value="Users.FavGenre" class="form-control shadow-none">
+                    <option value="">Genre:</option>
+                    @foreach (var genre in Enum.GetValues(typeof(Genre)))
+                    {
+                        <option value="@genre">
+                            @GenreDisplay.GetGenreName((Genre)genre).ToString()
+                        </option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label for="noGenre" class="form-label"> Least Favorite Genre:</label>
+                <InputSelect id="noGenre" @bind-Value="Users.NoGenre" class="form-control shadow-none">
+                    <option value="">Genre:</option>
+                    @foreach (var genre in Enum.GetValues(typeof(Genre)))
+                    {
+                        <option value="@genre">
+                            @GenreDisplay.GetGenreName((Genre)genre).ToString()
+                        </option>
+                    }
+                </InputSelect>
+            </div>
+
+            @* <div class="mb-3">
+                <label for="prefAge" class="form-label">
+                    UserName:
+                </label>
+                <InputText id="username" @bind-Value="Users.UserName" class="form-control shadow-none"></InputText>
+            </div> *@
+            
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </EditForm>
+    </div>
+</div>
+@code {
+    [SupplyParameterFromForm]
+    public Users Users { get; set; } = new();
+    private string? ErrorMessage { get; set; }
+    private async Task AddUsers()
+    {
+        var success = await Repository.AddUserAsync(Users);
+        if (success) { Navigation.NavigateTo("/"); }
+        else { ErrorMessage = "Could not save info. Please try again."; }
+    }
+}

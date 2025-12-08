@@ -1,16 +1,37 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
 <div class="page">
 
-     <div class="topnav">
+    <div class="topnav">
         <NavLink href="/" Match="NavLinkMatch.All" class="nav-link">Home</NavLink>
-        <NavLink href="/login" class="nav-link">Login</NavLink>
+        <NavLink href="/sign_up" class="nav-link">Sign up</NavLink>
         <NavLink href="/viewbooks" class="nav-link">ViewBooks</NavLink>
         <NavLink href="/addBooks" class="nav-link">Add Book</NavLink>
+        @* <NavLink href="/user_profile" class="nav-link">Profile</NavLink>  *@
+        <NavLink href="/login" class="nav-link">Login</NavLink> 
+        @* <AuthorizeView>
+            <Authorized>
+                <p>Welcome, @context.User.Identity.Name!</p>
+                <a href="/logout">Logout</a>
+                <a href="/user_profile">Profile</a>
+            </Authorized>
+            <NotAuthorized>
+                <a href="/login">Login</a>
+            </NotAuthorized>
+        </AuthorizeView>
+         <div class="dropdown">
+            <button class="dropbtn">Account
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="/sign_up">Sign up</a>
+            </div>
+        </div>*@
     </div> 
 
     <main>
-        <article class="content px-4">
+        <article class="content px-xl-4">
             @Body
         </article>
     </main>
@@ -21,3 +42,16 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+@code
+{
+    private bool isOpen = false;
+
+    private void ToggleDropdown()
+    {
+        isOpen = !isOpen;
+    }
+    private void Logout()
+    {
+        Navigation.NavigateTo("/login");
+    }
+}

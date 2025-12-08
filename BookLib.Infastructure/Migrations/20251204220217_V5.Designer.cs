@@ -4,6 +4,7 @@ using BookLib.Infastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookLib.Infastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251204220217_V5")]
+    partial class V5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,11 +73,26 @@ namespace BookLib.Infastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("FavGenre")
+                    b.Property<int>("FavGenre1")
                         .HasColumnType("int");
 
-                    b.Property<int>("NoGenre")
+                    b.Property<int>("FavGenre2")
                         .HasColumnType("int");
+
+                    b.Property<int>("FavGenre3")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NoGenre1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NoGenre2")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NoGenre3")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PrefAge")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -88,7 +106,7 @@ namespace BookLib.Infastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using BookLib.Domain.Enums;
+using BookLib.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
@@ -15,13 +16,8 @@ namespace BookLib.Domain.Entities
         [Required]
         [MaxLength(100)]
         public string? UserPass { get; set; }
-
-        public string? FavGenre1 { get; set; }
-        public string? FavGenre2 { get; set; }
-        public string? FavGenre3 { get; set; }
-        public string? NoGenre1 { get; set; }
-        public string? NoGenre2 { get; set; }
-        public string? NoGenre3 { get; set; }
-        public string? PrefAge { get; set; }
+        public Genre FavGenre { get; set; }
+        public Genre NoGenre { get; set; }
+        public ICollection<UserFav> FavoriteBooks { get; set; } = new List<UserFav>();
     }
 }
