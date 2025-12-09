@@ -27,5 +27,9 @@ namespace BookLib.Infastructure.Repositories
             }
             return await context.Users.FirstOrDefaultAsync(u => u.UserId == guid);
         }
+        public async Task<Users?> GetUsersAsync(string username, string password)
+        {
+            return await context.Users.FirstOrDefaultAsync(u => u.UserName == username && u.UserPass == password);
+        }
     }
 }

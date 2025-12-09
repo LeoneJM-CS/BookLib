@@ -1,6 +1,4 @@
 ﻿using System;
-//using System.Collections.Generic;
-//using System.Threading.Tasks;
 using BookLib.Domain.Entities;
 
 namespace BookLib.App.Interfaces

@@ -8,10 +8,11 @@
 {
     <div class="row justify-content-center mt-5">
         <div class="col-8">
-            <EditForm method="post" Enhance="true" FormName="EditBookForm" Model="Book" OnValidSubmit="Editbook1" autocomplete="off">
+            <EditForm method="post" Enhance="true" FormName="EditBookForm" Model="Book" OnValidSubmit="Editbook" autocomplete="off">
                 <h3>
                     Edit Book @Title
                 </h3>
+
                 <div class="mb-3">
                     <label for="title" class="form-label"> Title:</label>
                     <InputText id="title" @bind-Value="Book.Title" class="form-control shadow-none"></InputText>
@@ -75,7 +76,7 @@
     {
         Book ??= await Repository.GetBookIdAsync(Id);
     }
-    private async Task Editbook1()
+    private async Task Editbook()
     {
         if (Book is not null)
         {   

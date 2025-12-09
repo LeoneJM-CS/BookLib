@@ -33,13 +33,19 @@ namespace BookLib.Infastructure.Context
                 entity.Property(u => u.NoGenre);
             });
 
-            modelBuilder.Entity<UserFavs>(entity =>
-            {
-                entity.ToTable("UserFavs");
-                entity.HasKey(uf => new { uf.UserId, uf.BookId});
-                entity.HasOne<Users>().WithMany().HasForeignKey(uf => uf.UserId);
-                entity.HasOne<Book>().WithMany().HasForeignKey(uf => uf.BookId);
-            });
+            //modelBuilder.Entity<UserFavs>(entity =>
+            //{
+            //    entity.ToTable("UserFavs");
+            //    entity.HasKey(uf => new { uf.UserId, uf.BookId });
+
+            //    entity.HasOne(uf => uf.User)
+            //          .WithMany(u => u.FavoriteBooks)
+            //          .HasForeignKey(uf => uf.UserId);
+
+            //    entity.HasOne(uf => uf.Book)
+            //          .WithMany(b => b.FavoritedBy)
+            //          .HasForeignKey(uf => uf.BookId);
+            //});
         }    
     }
 }

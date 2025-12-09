@@ -18,6 +18,5 @@ namespace BookLib.Domain.Entities
         public string? UserPass { get; set; }
         public Genre FavGenre { get; set; }
         public Genre NoGenre { get; set; }
-        public ICollection<UserFav> FavoriteBooks { get; set; } = new List<UserFav>();
     }
 }

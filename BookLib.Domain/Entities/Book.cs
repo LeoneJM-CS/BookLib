@@ -1,4 +1,5 @@
 ﻿using BookLib.Domain.Enums;
+using BookLib.Domain.Entities;
 using System;
 using System.ComponentModel.DataAnnotations;
 

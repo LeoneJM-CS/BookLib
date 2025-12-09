@@ -1,50 +1,86 @@
 ﻿@page "/login"
 @using System.ComponentModel.DataAnnotations
 @using System.Threading.Tasks
+@inject IUserRepos Repos
 @inject AppDbContext DbContext
 @inject NavigationManager NavigationManager
 
 <PageTitle>Login</PageTitle>
 
 <EditForm Model="@loginModel" FormName="LoginForm" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
     <div class="form-group">
         <label for="username">Username</label>
-        <InputText id="username" class="form-control" @bind-Value="loginModel.Username" />
-        <ValidationMessage For="@(() => loginModel.Username)" />
+        <InputText id="username" @bind-Value="loginModel.Username" @bind-Value:event="oninput" class="form-control"></InputText>
     </div>
 
     <div class="form-group">
         <label for="password">Password</label>
-        <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
-        <ValidationMessage For="@(() => loginModel.Password)" />
+        <InputText id="password" @bind-Value="loginModel.Password" @bind-Value:event="oninput" class="form-control" type="password"></InputText>
     </div>
 
     <button type="submit" class="btn btn-primary">Login</button>
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-</EditForm>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+      <div class="alert alert-danger mt-3">@errorMessage</div>     
+    }
+    else
+    {
+        <div class="alert alert mt-3">@successfulLog</div>
+    }
+    </EditForm>
 
 @code {
     private LoginModel loginModel = new LoginModel();
+    private string? errorMessage;
+    private string? successfulLog;
+    private string? userName;
+    private string? userPass;
 
     private async Task HandleLogin()
     {
-        var user = await DbContext.Users
-        .FirstOrDefaultAsync(u => u.UserName == loginModel.Username);
-        if (user != null) { NavigationManager.NavigateTo("/"); }
-        else {}
+        errorMessage = null;
+        successfulLog = null;
+        userName = loginModel.Username;
+        userPass = loginModel.Password;
+        Console.WriteLine($"Attempting login with: '{userName}' / '{userPass}'");
 
+        var count = await DbContext.Users.CountAsync();
+
+        Console.WriteLine($"Users in DB: {count}");
+
+        var allUsers = await DbContext.Users.ToListAsync();
+        foreach (var u in allUsers)
+        {
+            Console.WriteLine($"{u.UserId} - {u.UserName} - {u.UserPass}");
+        }
+
+        if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userPass))
+                {
+                    errorMessage = "Could not find username or password TEst. Please try again";
+                    return;
+                }
+        var user = await Repos.GetUsersAsync(userName, userPass);
+        if (user != null)
+        {
+            successfulLog = $"Welcome {user.UserName}!";
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+        else { 
+            errorMessage = "Could not find username or password. Please try again"; 
+        }
     }
 
     public class LoginModel
     {
-        [Required(ErrorMessage = "Please enter a valid username")]
-        public string Username { get; set; } = string.Empty;
+        public string? Username { get; set; }
 
-        [Required(ErrorMessage = "Please enter a valid password")]
-        public string Password { get; set; } = string.Empty;
+        public string? Password { get; set; }
     }
+
     // private bool VerifyPassword(string enteredPassword, string storedHash)
     // {
     //     return BCrypt.Net.BCrypt.Verify(enteredPassword, storedHash);
