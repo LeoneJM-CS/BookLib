@@ -11,6 +11,7 @@ namespace BookLib.Infastructure.Context
         }
         public DbSet<Book> Books { get; set; }
         public DbSet<Users> Users { get; set; }
+        public DbSet<UserCurrent> UserCurrent { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -33,6 +34,14 @@ namespace BookLib.Infastructure.Context
                 entity.Property(u => u.NoGenre);
             });
 
+            modelBuilder.Entity<UserCurrent>(entity => {
+                entity.ToTable("CurrentUsers");
+                entity.HasKey(uc => uc.UserId);
+                entity.Property(uc => uc.UserName).IsRequired().HasMaxLength(100);
+                entity.Property(uc => uc.UserPass).IsRequired().HasMaxLength(100);
+                entity.Property(uc => uc.FavGenre);
+                entity.Property(uc => uc.NoGenre);
+            });
             //modelBuilder.Entity<UserFavs>(entity =>
             //{
             //    entity.ToTable("UserFavs");

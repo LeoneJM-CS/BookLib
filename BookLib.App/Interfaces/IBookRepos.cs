@@ -9,6 +9,6 @@ namespace BookLib.App.Interfaces
         Task<List<Book>> GetAllAsync();
         Task<Book?> GetBookIdAsync(Guid id);
         Task UpdateBookAsync(Book book);
-        Task<List<Book>> SearchBooksAsync(string search);
+        Task<IEnumerable<Book>> SearchBooksAsync(string search);
     }
 }

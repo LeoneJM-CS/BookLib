@@ -1,38 +1,61 @@
 ﻿@inherits LayoutComponentBase
+@inject IUserCurrentRepos UserCurrRepos
+@attribute [StreamRendering]
+@using Microsoft.AspNetCore.Components
 @inject NavigationManager Navigation
+
 
 <div class="page">
 
     <div class="topnav">
-        <NavLink href="/" Match="NavLinkMatch.All" class="nav-link">Home</NavLink>
-        <NavLink href="/sign_up" class="nav-link">Sign up</NavLink>
-        <NavLink href="/viewbooks" class="nav-link">View Books</NavLink>
-        <NavLink href="/addBooks" class="nav-link">Add Book</NavLink>
-        @* <NavLink href="/user_profile" class="nav-link">Profile</NavLink>  *@
-        <NavLink href="/login" class="nav-link">Login</NavLink> 
-        @* <AuthorizeView>
-            <Authorized>
-                <p>Welcome, @context.User.Identity.Name!</p>
-                <a href="/logout">Logout</a>
-                <a href="/user_profile">Profile</a>
-            </Authorized>
-            <NotAuthorized>
-                <a href="/login">Login</a>
-            </NotAuthorized>
-        </AuthorizeView>
-         <div class="dropdown">
-            <button class="dropbtn">Account
-                <i class="fa fa-caret-down"></i>
-            </button>
-            <div class="dropdown-content">
-                <a href="/sign_up">Sign up</a>
-            </div>
-        </div>*@
-    </div> 
+        @* <NavLink href="/" Match="NavLinkMatch.All" class="nav-link">Home</NavLink> *@
+        
+        @if (CurrUsers is null)
+        {
+            <p><em>Loading...</em></p>
+    
+        }
+        else if (!CurrUsers.Any())
+        {
+            
+            <span style="color: black; font-size: 1.1rem; margin-right: auto;">Hello There</span>
+            <NavLink href="/sign_up" class="nav-link">Sign up</NavLink>
+            @* <NavLink href="/viewbooks" class="nav-link">View Books</NavLink> *@
+            <NavLink href="/login" class="nav-link">Login</NavLink>
+        }
+        else
+        {
 
+            @foreach (var u in CurrUsers)
+            {
+
+                <span style="color: black; font-size: 1.1rem; margin-right: auto;">Welcome @u.UserName</span>
+                <NavLink href="/addBooks" class="nav-link">Add Book</NavLink>
+                <NavLink href="/viewbooks" class="nav-link">View Books</NavLink>
+                <NavLink href="/logout" class="nav-link">Logout</NavLink>
+
+            }
+
+        }
+       
+
+    </div> 
+    
     <main>
         <article class="content px-xl-4">
-            @Body
+            <ErrorBoundary>
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent Context="ex">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">💥 Error!</h4>
+                        <p><strong>@ex.GetType().Name:</strong> @ex.Message</p>
+                        <hr>
+                        <pre>@ex.StackTrace</pre>
+                    </div>
+                </ErrorContent>
+            </ErrorBoundary>
         </article>
     </main>
 </div>
@@ -42,16 +65,13 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
-@* @code
+@code
 {
-    private bool isOpen = false;
+    public List<UserCurrent> CurrUsers { get; set; } = new List<UserCurrent>();
+    [Inject] public IBookRepos? BookRepos { get; set; }
 
-    private void ToggleDropdown()
+    protected override async Task OnInitializedAsync()
     {
-        isOpen = !isOpen;
+        CurrUsers = await UserCurrRepos.GetAllCurrentAsync();
     }
-    private void Logout()
-    {
-        Navigation.NavigateTo("/login");
-    }
-} *@
+}

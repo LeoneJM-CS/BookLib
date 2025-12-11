@@ -1,41 +1,91 @@
 ﻿@page "/"
-@inject NavigationManager Navigation
-@inject IBookRepos Repository
-<PageTitle>Home</PageTitle>
-<div class="container">
-    <div class="search-container">
-        <InputText @bind-Value="SearchTerm"
-                   @oninput="SearchBooksLive"
-                   placeholder="Search..."
-                   class="form-control" />
-        @if (Results is not null && Results.Any())
-        {
-            <ul>
-                @foreach (var book in Results)
-                {
-                    <li>@book.Title by @book.AuthorLast</li>
-                }
-            </ul>
-        }
-    </div>
+@inject IUserCurrentRepos UserCurrRepos
+@attribute [StreamRendering]
+@using Microsoft.AspNetCore.Components
+
+@* @if (CurrUsers is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!CurrUsers.Any())
+{
+    <p>Hello There.</p>
+}
+else
+{
+
+    @foreach (var u in CurrUsers)
+    {
+
+        <h5>Welcome @u.UserName</h5>
+
+    }
+
+} *@
+<div class="mb-2">
+    <input @bind-value="SearchTerm" placeholder="Search..." class="form-control"   />
 </div>
 
+
 @code {
-    private string SearchTerm { get; set; } = string.Empty;
-    private List<Book> Results { get; set; } = new();
+    public IEnumerable<Book> BookList { get; set; } = new List<Book>();
+    // public List<UserCurrent> CurrUsers { get; set; } = new List<UserCurrent>();
+    private string? _searchTerm = string.Empty;
+    private CancellationTokenSource? _cts;
 
-    private async Task SearchBooksLive(ChangeEventArgs e)
+    public string? SearchTerm
     {
-        SearchTerm = e.Value?.ToString() ?? string.Empty;
-
-        if (!string.IsNullOrWhiteSpace(SearchTerm))
+        get => _searchTerm;
+        set
         {
-            Results = await Repository.SearchBooksAsync(SearchTerm);
+            _searchTerm = value;
+            DebounceSearch();
+        }
+    }
+
+    [Inject] public IBookRepos? BookRepos { get; set; }
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     CurrUsers = await UserCurrRepos.GetAllCurrentAsync();
+    //     BookList = await BookRepos!.GetAllAsync();
+    // }
+
+    private void DebounceSearch()
+    {
+        // Cancel any previous pending search
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                // Wait 400ms before firing search
+                await Task.Delay(400, _cts.Token);
+
+                // Run search after delay
+                await OnSearchAsync();
+                StateHasChanged(); // refresh UI
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore if cancelled
+            }
+        });
+    }
+
+    protected async Task OnSearchAsync()
+    {
+        if (BookRepos is null) throw new InvalidOperationException("IBookRepos is not registered.");
+
+        if (string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            BookList = await BookRepos.GetAllAsync();
         }
         else
         {
-            Results.Clear();
+            BookList = await BookRepos.SearchBooksAsync(SearchTerm);
         }
     }
 }
-

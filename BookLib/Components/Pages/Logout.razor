@@ -1,6 +1,79 @@
 ﻿@page "/logout"
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using System.Threading.Tasks
+@using BookLib.Domain.Entities
+@using BookLib.Infastructure.Context
+@using Microsoft.AspNetCore.Components.Authorization
+@using BookLib.Infastructure.Auth
+@inject IUserCurrentRepos UserCurrentRepos
+@inject AppDbContext DbContext
+@inject NavigationManager Navigation
+@inject CurrentUser AuthStateProvider
+
 <PageTitle>Logout</PageTitle>
+@if (!string.IsNullOrEmpty(Error))
+{
+    <div class="alert alert-danger">@Error</div>
+}
 
+<EditForm Model="logoutModel" FormName="LogoutForm" OnValidSubmit="HandleLogout">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <InputText class="form-control" @bind-Value="logoutModel.Username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText type="password" class="form-control" @bind-Value="logoutModel.Password" />
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary">Logout</button>
+        @* <a class="btn btn-secondary" href="/create-account">Create account</a> *@
+    </div>
+</EditForm>
 @code {
+    [SupplyParameterFromForm]
+    public LogoutModel logoutModel { get; set; } = new();
 
+    string Error = string.Empty;
+
+    private async Task HandleLogout()
+    {
+        var user = await UserCurrentRepos.LogoutUserAsync(logoutModel.Username, logoutModel.Password);
+
+        if (user == null)
+        {
+            Error = "Invalid username or password";
+        }
+        else
+        {
+            AuthStateProvider.SetUser(user.UserName);
+
+            // var userCurrent = new UserCurrent
+            // {
+            //     UserId = user.UserId,
+            //     UserName = user.UserName,
+            //     UserPass = user.UserPass,
+            //     FavGenre = user.FavGenre,
+            //     NoGenre = user.NoGenre
+            // };
+
+            await UserCurrentRepos.RemoveUserCurrentAsync(user);
+
+            Console.WriteLine($"User {user.UserName} logged in.");
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    public class LogoutModel
+    {
+        [Required]
+        public string Username { get; set; } = string.Empty;
+
+        [Required]
+        public string Password { get; set; } = string.Empty;
+    }
 }

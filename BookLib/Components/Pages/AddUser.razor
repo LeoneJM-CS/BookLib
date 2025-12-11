@@ -59,6 +59,7 @@
     private string? ErrorMessage { get; set; }
     private async Task AddUsers()
     {
+        // Users.UserPass = BCrypt.Net.BCrypt.HashPassword(Users.UserPass);
         var success = await Repository.AddUserAsync(Users);
         if (success) { Navigation.NavigateTo("/"); }
         else { ErrorMessage = "Could not save info. Please try again."; }

@@ -1,0 +1,16 @@
+﻿@* @using BookLib.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(AppUser).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p>Sorry, nothing here.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState> *@

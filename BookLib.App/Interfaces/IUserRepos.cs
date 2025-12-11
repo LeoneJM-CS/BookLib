@@ -7,8 +7,10 @@ namespace BookLib.App.Interfaces
 {
     public interface IUserRepos
     {
+        Task<Users?> GetUserIdAsync(Guid id);
         Task<bool> AddUserAsync(Users users);
         //Task AddFavBookAsync(UserFavs userFavs);
-        Task<Users> GetUsersAsync(string username, string password);
+        Task<Users> LoginAsync(string username, string password);
+        
     }
 }

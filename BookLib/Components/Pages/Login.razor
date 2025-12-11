@@ -1,88 +1,82 @@
 ﻿@page "/login"
 @using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
 @using System.Threading.Tasks
+@using BookLib.Domain.Entities
+@using BookLib.Infastructure.Context
+@using Microsoft.AspNetCore.Components.Authorization 
+@using BookLib.Infastructure.Auth
 @inject IUserRepos Repos
+@inject IUserCurrentRepos UserCurrentRepos
 @inject AppDbContext DbContext
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
+@inject CurrentUser AuthStateProvider 
 
 <PageTitle>Login</PageTitle>
 
-<EditForm Model="@loginModel" FormName="LoginForm" OnValidSubmit="HandleLogin">
+@if (!string.IsNullOrEmpty(Error))
+{
+    <div class="alert alert-danger">@Error</div>
+}
+
+<EditForm Model="loginModel" FormName="LoginForm" OnValidSubmit="HandleLogin">
     <DataAnnotationsValidator />
-    <ValidationSummary />
 
-    <div class="form-group">
-        <label for="username">Username</label>
-        <InputText id="username" @bind-Value="loginModel.Username" @bind-Value:event="oninput" class="form-control"></InputText>
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <InputText class="form-control" @bind-Value="loginModel.Username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
     </div>
 
-    <div class="form-group">
-        <label for="password">Password</label>
-        <InputText id="password" @bind-Value="loginModel.Password" @bind-Value:event="oninput" class="form-control" type="password"></InputText>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary">Login</button>
+        @* <a class="btn btn-secondary" href="/create-account">Create account</a> *@
     </div>
-
-    <button type="submit" class="btn btn-primary">Login</button>
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-      <div class="alert alert-danger mt-3">@errorMessage</div>     
-    }
-    else
-    {
-        <div class="alert alert mt-3">@successfulLog</div>
-    }
-    </EditForm>
+</EditForm>
 
 @code {
-    private LoginModel loginModel = new LoginModel();
-    private string? errorMessage;
-    private string? successfulLog;
-    private string? userName;
-    private string? userPass;
+    [SupplyParameterFromForm]
+    public LoginModel loginModel { get; set; } = new();
+
+    string Error = string.Empty;
 
     private async Task HandleLogin()
     {
-        errorMessage = null;
-        successfulLog = null;
-        userName = loginModel.Username;
-        userPass = loginModel.Password;
-        Console.WriteLine($"Attempting login with: '{userName}' / '{userPass}'");
+        var user = await Repos.LoginAsync(loginModel.Username, loginModel.Password);
 
-        var count = await DbContext.Users.CountAsync();
-
-        Console.WriteLine($"Users in DB: {count}");
-
-        var allUsers = await DbContext.Users.ToListAsync();
-        foreach (var u in allUsers)
+        if (user == null)
         {
-            Console.WriteLine($"{u.UserId} - {u.UserName} - {u.UserPass}");
+            Error = "Invalid username or password";
         }
-
-        if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userPass))
-                {
-                    errorMessage = "Could not find username or password TEst. Please try again";
-                    return;
-                }
-        var user = await Repos.GetUsersAsync(userName, userPass);
-        if (user != null)
+        else
         {
-            successfulLog = $"Welcome {user.UserName}!";
-            NavigationManager.NavigateTo("/", forceLoad: true);
-        }
-        else { 
-            errorMessage = "Could not find username or password. Please try again"; 
+            AuthStateProvider.SetUser(user.UserName);
+
+            var userCurrent = new UserCurrent
+            {
+                UserId = user.UserId,
+                UserName = user.UserName,
+                UserPass = user.UserPass,
+                FavGenre = user.FavGenre,
+                NoGenre = user.NoGenre
+            };
+
+            await UserCurrentRepos.AddUserCurrentAsync(userCurrent);
+
+            Console.WriteLine($"User {user.UserName} logged in.");
+            Navigation.NavigateTo("/");
         }
     }
 
     public class LoginModel
     {
-        public string? Username { get; set; }
+        [Required]
+        public string Username { get; set; } = string.Empty;
 
-        public string? Password { get; set; }
+        [Required]
+        public string Password { get; set; } = string.Empty;
     }
-
-    // private bool VerifyPassword(string enteredPassword, string storedHash)
-    // {
-    //     return BCrypt.Net.BCrypt.Verify(enteredPassword, storedHash);
-    // }
 }
