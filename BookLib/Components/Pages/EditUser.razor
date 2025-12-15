@@ -1,0 +1,99 @@
+﻿@page "/edit_user/{Id:guid}"
+@inject IUserRepos Repository
+@inject IUserCurrentRepos userCurrentRepos
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Profile</PageTitle>
+
+@if (users is not null)
+{
+    <div class="row justify-content-center mt-5">
+        <div class="col-8">
+            <EditForm method="post" Enhance="true" FormName="EditBookForm" Model="users" OnValidSubmit="EditUsers" autocomplete="off">
+                <h3>
+                    Edit @users.UserName
+                </h3>
+
+                <div class="mb-3">
+                    <label for="title" class="form-label"> Title:</label>
+                    <InputText id="title" @bind-Value="users.UserName" class="form-control shadow-none"></InputText>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label"> Password: </label>
+                    <InputText id="password" @bind-Value="users.UserPass" class="form-control shadow-none"></InputText>
+                </div>
+
+                <div class="mb-3">
+                    <label for="favGenre" class="form-label"></label>
+                    <InputSelect id="favGenre" @bind-Value="users.FavGenre" class="form-control shadow-none">
+                        <option value="">Favorite Genre:</option>
+                        @foreach (var genre in Enum.GetValues(typeof(Genre)))
+                        {
+                            <option value="@genre">
+                                @GenreDisplay.GetGenreName((Genre)genre).ToString()
+                            </option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label for="noGenre" class="form-label"></label>
+                    <InputSelect id="noGenre" @bind-Value="users.NoGenre" class="form-control shadow-none">
+                        <option value="">Least Favorite Genre:</option>
+                        @foreach (var genre in Enum.GetValues(typeof(Genre)))
+                        {
+                            <option value="@genre">
+                                @GenreDisplay.GetGenreName((Genre)genre).ToString()
+                            </option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+
+                <span class="alert">You may need to logout and re-login to see changes</span>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+            </EditForm>
+        </div>
+    </div>
+}
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    // [Parameter]
+    // public string? Pass { get; set; }
+
+    [Parameter]
+    public string? UserName { get; set; }
+
+    [SupplyParameterFromForm]
+    public Users? users { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        users ??= await Repository.GetUserIdAsync(Id);
+    }
+    private async Task EditUsers()
+    {
+        if (users is not null)
+        {
+            users.UserId = Id;
+            // users.UserPass = Pass;
+            var userCurrent = new UserCurrent
+            {
+                UserId = users.UserId,
+                UserName = users.UserName,
+                UserPass = users.UserPass,
+                FavGenre = users.FavGenre,
+                NoGenre = users.NoGenre
+            };
+            
+            await Repository.UpdateUserAsync(users);
+            await userCurrentRepos.UpdateCurrentUserAsync(userCurrent);
+
+            Navigation.NavigateTo("/profile");
+        }
+    }
+}

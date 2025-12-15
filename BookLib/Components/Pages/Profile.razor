@@ -1,32 +1,49 @@
-﻿@page "/user_profile"
-@attribute [Authorize]
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject AppDbContext DbContext
+﻿@page "/profile"
+@inject IUserCurrentRepos UserCurrRepos
+@inject IBookRepos BookRepos
+@inject IUserRepos UserRepos
+@attribute [StreamRendering]
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager Navigation
 
 <PageTitle>Profile</PageTitle>
 
-@if (userLog != null)
-{
-    <p><strong>Username:</strong> @userLog.UserName</p>
-    <p><strong>Favorite Genre:</strong> @userLog.FavGenre</p>
-    <p><strong>Least Favorite Genre:</strong>@userLog.NoGenre</p>
-}
-else
-{
-    <p>Loading...</p>
+@foreach (var u in currUsers)
+{    
+        <div class="profile-body">
+            <h5>@u.UserName</h5>
+            Favorite Genre: @GenreDisplay.GetGenreName(u.FavGenre)
+            | Least Favorite Genre: @GenreDisplay.GetGenreName(u.NoGenre)
+        </div>
+    <EditForm Model="profileModel" FormName="EditUserForm" OnValidSubmit="SendToEdit">
+        <div class="d-flex gap-3">
+            <button class="btn btn-primary">Edit Profile</button>
+        </div>
+    </EditForm>
 }
 
+@* @if (currUsers != null && currUsers.Count > 0)
+{
+    Navigation.NavigateTo($"/edit_user/{currUsers[0].UserId}");
+} *@
+
 @code {
-    private Users? userLog;
+    public List<UserCurrent> currUsers { get; set; } = new List<UserCurrent>();
+
+    [SupplyParameterFromForm(FormName = "EditUser")]
+    public ProfileModel profileModel { get; set; } = new();
+    
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (!string.IsNullOrEmpty(userId) && Guid.TryParse(userId, out var id))
+        currUsers = await UserCurrRepos.GetAllCurrentAsync();
+    }
+    private void SendToEdit()
+    {
+        if (currUsers != null)
         {
-            userLog = await DbContext.Users.FirstOrDefaultAsync(u => u.UserId == id);
+            Navigation.NavigateTo($"/edit_user/{currUsers[0].UserId}");
         }
     }
+    public class ProfileModel { }
 }

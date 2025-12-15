@@ -42,6 +42,13 @@ namespace BookLib.Infastructure.Context
                 entity.Property(uc => uc.FavGenre);
                 entity.Property(uc => uc.NoGenre);
             });
+            modelBuilder.Entity<FavBooks>(entity => {
+                entity.ToTable("FavBooks");
+                entity.HasKey(fb => fb.FavId);
+                entity.Property(fb => fb.UserId).IsRequired();
+                entity.Property(fb => fb.BookId).IsRequired();
+            });
+
             //modelBuilder.Entity<UserFavs>(entity =>
             //{
             //    entity.ToTable("UserFavs");

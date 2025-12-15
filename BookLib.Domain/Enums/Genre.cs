@@ -6,7 +6,7 @@ namespace BookLib.Domain.Enums
     public enum Genre
     {
         [Display(Name = "Art & Design")]
-        Art,
+        Art = 1,
 
         [Display(Name = "Biographies & Memoirs")]
         Biographies,

@@ -1,91 +1,93 @@
 ﻿@page "/"
 @inject IUserCurrentRepos UserCurrRepos
+@inject IBookRepos Repository
 @attribute [StreamRendering]
 @using Microsoft.AspNetCore.Components
 
-@* @if (CurrUsers is null)
-{
-    <p><em>Loading...</em></p>
-}
-else if (!CurrUsers.Any())
-{
-    <p>Hello There.</p>
-}
-else
-{
+<div class="col-6">
+    <div class="mb-3">
+        <EditForm method="post" FormName="Search" Model="Book" OnValidSubmit="OnSearchClicked" autocomplete="off">
+            <InputText @bind-Value="Book.Title"
+                       placeholder="Type book title..."
+                       class="form-control shadow-none" />
+            <button type="submit" class="btn btn-primary mt-2">
+                Enter
+            </button>
+        </EditForm>
+        <EditForm FormName="SearchGenre" Model="Book" OnValidSubmit="OnGenreClicked" autocomplete="off">
+            <div class="mb-3">
+                <label for="genre" class="form-label"> Search By Genre</label>
+                <InputSelect id="genre" @bind-Value="Book.Genre" class="form-control shadow-none">
+                    <option value="">Select Genre:</option>
+                    @foreach (var genre in Enum.GetValues(typeof(Genre)))
+                    {
+                        <option value="@genre">
+                            @GenreDisplay.GetGenreName((Genre)genre).ToString()
+                        </option>
+                    }
+                </InputSelect>
+            </div>
 
-    @foreach (var u in CurrUsers)
+            <button type="submit" class="btn btn-primary mt-2">
+                Apply Genre
+            </button>
+        </EditForm>
+
+
+    </div>
+    @if (filteredBooks is null)
     {
-
-        <h5>Welcome @u.UserName</h5>
-
+        <div class="book-item">Loading books..., Please wait!</div>
     }
-
-} *@
-<div class="mb-2">
-    <input @bind-value="SearchTerm" placeholder="Search..." class="form-control"   />
-</div>
-
-
-@code {
-    public IEnumerable<Book> BookList { get; set; } = new List<Book>();
-    // public List<UserCurrent> CurrUsers { get; set; } = new List<UserCurrent>();
-    private string? _searchTerm = string.Empty;
-    private CancellationTokenSource? _cts;
-
-    public string? SearchTerm
+    else if (filteredBooks.Any())
     {
-        get => _searchTerm;
-        set
+        @foreach (var book in filteredBooks)
         {
-            _searchTerm = value;
-            DebounceSearch();
+            <div class="book-item mb-2">
+                <BookCard Book1="book" />
+            </div>
         }
     }
-
-    [Inject] public IBookRepos? BookRepos { get; set; }
-
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     CurrUsers = await UserCurrRepos.GetAllCurrentAsync();
-    //     BookList = await BookRepos!.GetAllAsync();
-    // }
-
-    private void DebounceSearch()
+    else
     {
-        // Cancel any previous pending search
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                // Wait 400ms before firing search
-                await Task.Delay(400, _cts.Token);
-
-                // Run search after delay
-                await OnSearchAsync();
-                StateHasChanged(); // refresh UI
-            }
-            catch (TaskCanceledException)
-            {
-                // Ignore if cancelled
-            }
-        });
+        <div class="book-item">No books found.</div>
     }
 
-    protected async Task OnSearchAsync()
-    {
-        if (BookRepos is null) throw new InvalidOperationException("IBookRepos is not registered.");
+</div>
 
-        if (string.IsNullOrWhiteSpace(SearchTerm))
+@code {
+    [SupplyParameterFromForm]
+    public Book Book { get; set; } = new Book();
+    private List<Book> filteredBooks = new();
+    private string? searchText = "";
+    private int? searchGenre = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Optionally load all books at first
+        filteredBooks = await Repository.GetAllAsync();
+    }
+    // Called when the user types
+    private async Task OnSearchClicked()
+    {
+        searchText = Book.Title;
+
+        if (string.IsNullOrWhiteSpace(searchText))
         {
-            BookList = await BookRepos.GetAllAsync();
+            filteredBooks = await Repository.GetAllAsync();
         }
         else
         {
-            BookList = await BookRepos.SearchBooksAsync(SearchTerm);
+            filteredBooks = await Repository.SearchByNameAsync(searchText);
         }
+        StateHasChanged();
+    }
+
+    private async Task OnGenreClicked()
+    {
+        var genre = Book.Genre;
+
+        filteredBooks = await Repository.SearchByGenreAsync(genre);
+
     }
 }

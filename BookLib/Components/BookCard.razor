@@ -1,25 +1,57 @@
 ﻿@inject IUserCurrentRepos UserCurrentRepos
 
-<div class="book-card">
-    <div class="book-body">
-        <h5>@book1.Title</h5>
-        By @book1.AuthorFirst @book1.AuthorLast | Series: @book1.Series | Genre: @GenreDisplay.GetGenreName(book1.Genre)
-        | Age Level: @book1.AgeLevel | Discription: @book1.Description
+@if (CurrUsers is null)
+{
+    <p><em>Loading...</em></p>
+
+}
+else if (!CurrUsers.Any())
+{
+    <div class="book-card">
+        <div class="book-body">
+            <h5>@book1.Title</h5>
+            By @book1.AuthorFirst @book1.AuthorLast | Series: @book1.Series | Genre: @GenreDisplay.GetGenreName(book1.Genre)
+            | Age Level: @book1.AgeLevel | Description: @book1.Description
+        </div>
+        @* <div class="actions">
+            <a href="@($"/edit/{book1.Id}")" class="btn btn-warning shadow-none">
+                Edit Book
+            </a>
+        </div> *@
     </div>
-    <div class="actions">
-        <a href="@($"/edit/{book1.Id}")" class="btn btn-warning shadow-none">
-            Edit Book
-        </a>
-    </div>
-</div>
+
+}
+else
+{
+
+    @foreach (var u in CurrUsers)
+    {
+
+        <div class="book-card">
+            <div class="book-body">
+                <h5>@book1.Title</h5>
+                By @book1.AuthorFirst @book1.AuthorLast | Series: @book1.Series | Genre: @GenreDisplay.GetGenreName(book1.Genre)
+                | Age Level: @book1.AgeLevel | Discription: @book1.Description
+            </div>
+            <div class="actions">
+                <a href="@($"/edit/{book1.Id}")" class="btn btn-warning shadow-none">
+                    Edit Book
+                </a>
+            </div>
+        </div>
+
+    }
+
+}
+
 
 @code {
     [Parameter]
     public required Book book1 { get; set; }
-    // public List<UserCurrent> CurrUsers { get; set; } = new List<UserCurrent>();
+    public List<UserCurrent> CurrUsers { get; set; } = new List<UserCurrent>();
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     CurrUsers = await UserCurrentRepos.GetAllCurrentAsync();
-    // }
+    protected override async Task OnInitializedAsync()
+    {
+        CurrUsers = await UserCurrentRepos.GetAllCurrentAsync();
+    }
 }

@@ -12,5 +12,6 @@ namespace BookLib.App.Interfaces
         Task<UserCurrent?> GetCurrentIdAsync(Guid id);
         Task<UserCurrent> LogoutUserAsync(string username, string password);
         Task<bool> RemoveUserCurrentAsync(UserCurrent usercurrent);
+        Task UpdateCurrentUserAsync(UserCurrent usercurrent);
     }
 }

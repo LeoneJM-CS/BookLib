@@ -11,6 +11,8 @@ namespace BookLib.App.Interfaces
         Task<bool> AddUserAsync(Users users);
         //Task AddFavBookAsync(UserFavs userFavs);
         Task<Users> LoginAsync(string username, string password);
-        
+        Task UpdateUserAsync(Users users);
+
+
     }
 }

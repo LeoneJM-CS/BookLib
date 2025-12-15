@@ -10,37 +10,46 @@ namespace BookLib.Infastructure.Repositories
 {
     public class UserCurrentRepos : IUserCurrentRepos
     {
-        private readonly AppDbContext _context;
-        public UserCurrentRepos(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
+
         public UserCurrentRepos(IDbContextFactory<AppDbContext> factory)
         {
-            _context = factory.CreateDbContext();
+            _contextFactory = factory;
         }
 
         public async Task<List<UserCurrent>> GetAllCurrentAsync()
         {
-            var currUser = await _context.UserCurrent.ToListAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var currUser = await context.UserCurrent.ToListAsync();
             return currUser;
         }
+
         public async Task<bool> AddUserCurrentAsync(UserCurrent usercurrent)
         {
-            _context.UserCurrent.Add(usercurrent);
-            var result = await _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.UserCurrent.Add(usercurrent);
+            var result = await context.SaveChangesAsync();
             return result > 0;
         }
+        public async Task UpdateCurrentUserAsync(UserCurrent usercurrent)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.Entry(usercurrent).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+        }
+
         public async Task<UserCurrent?> GetCurrentIdAsync(Guid id)
         {
-            var currUser = await _context.UserCurrent.FirstOrDefaultAsync(uc => uc.UserId == id);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var currUser = await context.UserCurrent.FirstOrDefaultAsync(uc => uc.UserId == id);
             return currUser;
         }
+
         public async Task<UserCurrent?> LogoutUserAsync(string username, string password)
         {
             Console.WriteLine($"Logout attempt with {username} / {password}");
-            //string error = string.Empty;
-            var user = await _context.UserCurrent.FirstOrDefaultAsync(u => u.UserName == username);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var user = await context.UserCurrent.FirstOrDefaultAsync(u => u.UserName == username);
 
             if (user == null)
             {
@@ -60,11 +69,14 @@ namespace BookLib.Infastructure.Repositories
             //}
             return user;
         }
+
         public async Task<bool> RemoveUserCurrentAsync(UserCurrent userCurrent)
         {
-            _context.UserCurrent.Remove(userCurrent);
-            var result = await _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.UserCurrent.Remove(userCurrent);
+            var result = await context.SaveChangesAsync();
             return result > 0;
         }
     }
 }
+// This code was edited

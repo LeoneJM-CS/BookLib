@@ -8,7 +8,7 @@
 <div class="page">
 
     <div class="topnav">
-        @* <NavLink href="/" Match="NavLinkMatch.All" class="nav-link">Home</NavLink> *@
+        
         
         @if (CurrUsers is null)
         {
@@ -19,8 +19,10 @@
         {
             
             <span style="color: black; font-size: 1.1rem; margin-right: auto;">Hello There</span>
+        
+            <NavLink href="/" Match="NavLinkMatch.All" class="nav-link">Home</NavLink>
             <NavLink href="/sign_up" class="nav-link">Sign up</NavLink>
-            @* <NavLink href="/viewbooks" class="nav-link">View Books</NavLink> *@
+            <NavLink href="/viewbooks" class="nav-link">View Books</NavLink>
             <NavLink href="/login" class="nav-link">Login</NavLink>
         }
         else
@@ -30,10 +32,12 @@
             {
 
                 <span style="color: black; font-size: 1.1rem; margin-right: auto;">Welcome @u.UserName</span>
+                <NavLink href="/" Match="NavLinkMatch.All" class="nav-link">Home</NavLink>
                 <NavLink href="/addBooks" class="nav-link">Add Book</NavLink>
                 <NavLink href="/viewbooks" class="nav-link">View Books</NavLink>
+                <NavLink href="/profile" class="nav-link">Profile</NavLink>
                 <NavLink href="/logout" class="nav-link">Logout</NavLink>
-
+                
             }
 
         }
