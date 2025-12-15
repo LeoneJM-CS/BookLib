@@ -1,29 +1,30 @@
 ﻿@page "/sign_up"
 @inject IUserRepos Repository
+@inject IUserCurrentRepos userCurrentRepos
 @inject NavigationManager Navigation
 
 <PageTitle>Sign In</PageTitle>
 
 <div class="row justify-content-center mb-5">
     <div class="col-10">
-        <EditForm method="post" FormName="AddUserForm" Model="Users" OnValidSubmit="AddUsers" autocomplete="off">
+        <EditForm method="post" FormName="AddUserForm" Model="User" OnValidSubmit="AddUsers" autocomplete="off">
             <div class="mb-3">
                 <label for="username" class="form-label">
                     Username:
                 </label>
-                <InputText id="username" @bind-Value="Users.UserName" class="form-control shadow-none"></InputText>
+                <InputText id="username" @bind-Value="User.UserName" class="form-control shadow-none"></InputText>
             </div>
 
             <div class="mb-3">
                 <label for="password" class="form-label">
                     Password:
                 </label>
-                <InputText id="password" @bind-Value="Users.UserPass" type="password" class="form-control shadow-none"></InputText>
+                <InputText id="password" @bind-Value="User.UserPass" type="password" class="form-control shadow-none"></InputText>
             </div>
 
             <div class="mb-3">
                 <label for="favgenre" class="form-label"> Favorite Genre:</label>
-                <InputSelect id="favgenre" @bind-Value="Users.FavGenre" class="form-control shadow-none">
+                <InputSelect id="favgenre" @bind-Value="User.FavGenre" class="form-control shadow-none">
                     <option value="">Genre:</option>
                     @foreach (var genre in Enum.GetValues(typeof(Genre)))
                     {
@@ -36,7 +37,7 @@
 
             <div class="mb-3">
                 <label for="noGenre" class="form-label"> Least Favorite Genre:</label>
-                <InputSelect id="noGenre" @bind-Value="Users.NoGenre" class="form-control shadow-none">
+                <InputSelect id="noGenre" @bind-Value="User.NoGenre" class="form-control shadow-none">
                     <option value="">Genre:</option>
                     @foreach (var genre in Enum.GetValues(typeof(Genre)))
                     {
@@ -55,12 +56,25 @@
 </div>
 @code {
     [SupplyParameterFromForm]
-    public Users Users { get; set; } = new();
+    public Users User { get; set; } = new();
     private string? ErrorMessage { get; set; }
     private async Task AddUsers()
     {
+        var success = await Repository.AddUserAsync(User);
+
+        var user = await Repository.LoginAsync(User.UserName, User.UserPass);
+        var userCurrent = new UserCurrent
+        {
+            UserId = user.UserId,
+            UserName = user.UserName,
+            UserPass = user.UserPass,
+            FavGenre = user.FavGenre,
+            NoGenre = user.NoGenre
+        };
+
+        await userCurrentRepos.AddUserCurrentAsync(userCurrent);
         // Users.UserPass = BCrypt.Net.BCrypt.HashPassword(Users.UserPass);
-        var success = await Repository.AddUserAsync(Users);
+        
         if (success) { Navigation.NavigateTo("/"); }
         else { ErrorMessage = "Could not save info. Please try again."; }
     }

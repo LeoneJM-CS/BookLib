@@ -69,7 +69,9 @@ namespace BookLib.Infastructure.Repositories
                     (b.AuthorFirst != null &&
                      EF.Functions.Like(b.AuthorFirst, $"%{name}%")) ||
                      (b.AuthorLast != null &&
-                     EF.Functions.Like(b.AuthorLast, $"%{name}%"))
+                     EF.Functions.Like(b.AuthorLast, $"%{name}%")) ||
+                     (b.Series != null &&
+                     EF.Functions.Like(b.Series, $"%{name}%"))
         )
         .ToListAsync();
 
